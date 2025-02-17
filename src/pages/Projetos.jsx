@@ -1,37 +1,3 @@
-// // src/pages/Projetos.jsx
-// import React from 'react';
-// import { Container, Paper, Box, Typography, Button, List, ListItem, ListItemText } from '@mui/material';
-
-// function Projetos() {
-//   const projetos = [
-//     { id: 1, nome: "Projeto 1", descricao: "Descrição do projeto 1" },
-//     { id: 2, nome: "Projeto 2", descricao: "Descrição do projeto 2" },
-//   ];
-
-//   return (
-//     <Container maxWidth="md" sx={{ mt: 10 }}>
-//       <Paper elevation={3} sx={{ p: 4 }}>
-//         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-//           <Typography variant="h4">Projetos</Typography>
-//           <Button variant="contained" color="primary">
-//             Adicionar Projeto
-//           </Button>
-//         </Box>
-//         <List>
-//           {projetos.map((projeto) => (
-//             <ListItem key={projeto.id} button>
-//               <ListItemText primary={projeto.nome} secondary={projeto.descricao} />
-//             </ListItem>
-//           ))}
-//         </List>
-//       </Paper>
-//     </Container>
-//   );
-// }
-
-// export default Projetos;
-
-
 import { useEffect, useState } from 'react';
 import { getProjects } from '../supabaseClient';
 
