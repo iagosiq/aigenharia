@@ -31,6 +31,7 @@ function ProjectDetail() {
   const [structures, setStructures] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [selectedPdf, setSelectedPdf] = useState(null);
+  const [showSavedCard, setShowSavedCard] = useState(false);
 
   // Opções para o seletor de medida
   const measureOptions = ["m³", "m²", "m", "cm", "Outros"];
@@ -55,7 +56,6 @@ function ProjectDetail() {
     }
     fetchProject();
   }, [projectId]);
-
 
   const handleUploadPdf = async (event) => {
     const file = event.target.files[0];
@@ -96,7 +96,7 @@ function ProjectDetail() {
     }
     setPdfLoading(false);
   };
-  
+
   // Manipulação das estruturas
   const handleAddStructure = () => {
     setStructures([...structures, { name: '', unit: '', customUnit: '' }]);
@@ -124,6 +124,7 @@ function ProjectDetail() {
       setSnackbar({ open: true, message: 'Erro ao salvar estruturas', severity: 'error' });
     } else {
       setSnackbar({ open: true, message: 'Estruturas salvas com sucesso!', severity: 'success' });
+      setShowSavedCard(true);
     }
   };
 
@@ -225,54 +226,77 @@ function ProjectDetail() {
         )}
       </Paper>
 
-      {/* Seção para inserir estruturas */}
+      {/* Seção para inserir e salvar estruturas */}
       <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h5" gutterBottom>
           Estruturas e Medidas
         </Typography>
-        {structures.map((structure, index) => (
-          <Box key={index} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2, alignItems: 'center' }}>
-            <TextField
-              label="Nome da Estrutura"
-              variant="outlined"
-              value={structure.name}
-              onChange={(e) => handleStructureChange(index, 'name', e.target.value)}
-            />
-            <TextField
-              select
-              label="Medida"
-              variant="outlined"
-              value={structure.unit}
-              onChange={(e) => handleStructureChange(index, 'unit', e.target.value)}
-              sx={{ minWidth: 120 }}
-            >
-              {measureOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
+        {!showSavedCard ? (
+          <>
+            {structures.map((structure, index) => (
+              <Box key={index} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2, alignItems: 'center' }}>
+                <TextField
+                  label="Nome da Estrutura"
+                  variant="outlined"
+                  value={structure.name}
+                  onChange={(e) => handleStructureChange(index, 'name', e.target.value)}
+                />
+                <TextField
+                  select
+                  label="Medida"
+                  variant="outlined"
+                  value={structure.unit}
+                  onChange={(e) => handleStructureChange(index, 'unit', e.target.value)}
+                  sx={{ minWidth: 120 }}
+                >
+                  {measureOptions.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                {structure.unit === "Outros" && (
+                  <TextField
+                    label="Medida personalizada"
+                    variant="outlined"
+                    value={structure.customUnit || ''}
+                    onChange={(e) => handleStructureChange(index, 'customUnit', e.target.value)}
+                  />
+                )}
+                <IconButton color="error" onClick={() => handleDeleteStructure(index)}>
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            ))}
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+              <Button variant="outlined" onClick={handleAddStructure}>
+                Adicionar Estrutura
+              </Button>
+              <Button variant="contained" onClick={handleSaveStructures}>
+                Salvar Estruturas
+              </Button>
+            </Box>
+          </>
+        ) : (
+          <Paper sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
+            <Typography variant="h5" gutterBottom>
+              Estruturas Salvas
+            </Typography>
+            <List>
+              {structures.map((structure, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={structure.name}
+                    secondary={structure.unit === 'Outros' ? structure.customUnit : structure.unit}
+                  />
+                </ListItem>
               ))}
-            </TextField>
-            {structure.unit === "Outros" && (
-              <TextField
-                label="Medida personalizada"
-                variant="outlined"
-                value={structure.customUnit || ''}
-                onChange={(e) => handleStructureChange(index, 'customUnit', e.target.value)}
-              />
-            )}
-            <IconButton color="error" onClick={() => handleDeleteStructure(index)}>
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        ))}
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-          <Button variant="outlined" onClick={handleAddStructure}>
-            Adicionar Estrutura
-          </Button>
-          <Button variant="contained" onClick={handleSaveStructures}>
-            Salvar Estruturas
-          </Button>
-        </Box>
+            </List>
+            <Button variant="contained" onClick={() => setShowSavedCard(false)}>
+              Editar Estruturas
+            </Button>
+          </Paper>
+        )}
       </Paper>
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={handleCloseSnackbar}>

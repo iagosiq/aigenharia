@@ -99,7 +99,16 @@ function Projects() {
                 component={Link}
                 to={`/projeto/${project.id}`}
               >
-                <ListItemText primary={project.name} secondary={project.description} />
+                <ListItemText 
+                  primary={project.name} 
+                  secondary={project.description}
+                  sx={{
+                    '& .MuiListItemText-primary': {
+                      borderBottom: '1px solid #ccc', // Adiciona borda inferior ao texto primário (nome do projeto)
+                      color: '#202020', // Cor do texto primário
+                    },
+                  }} 
+                  />
               </ListItem>
             ))}
           </List>

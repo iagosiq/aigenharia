@@ -20,7 +20,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: 'main',
+          backgroundColor: 'magenta',
           margin: 0,
           padding: 0,
         },
@@ -32,10 +32,7 @@ const theme = createTheme({
           boxShadow: 'none',
           border: '1px solid #ccc',
           borderRadius: '8px',
-          backgroundColor: '#f5f5f5',
-          '&:hover': {
-            backgroundColor: '#e0e0e0',
-          },
+
         },
       },
     },
@@ -46,9 +43,6 @@ const theme = createTheme({
           border: '1px solid #ccc',
           borderRadius: '8px',
           backgroundColor: '#f5f5f5',
-          '&:hover': {
-            backgroundColor: '#e0e0e0',
-          },
         },
       },
     },
@@ -59,20 +53,15 @@ const theme = createTheme({
           border: '1px solid #ccc',
           borderRadius: '8px',
           backgroundColor: '#f5f5f5',
-          '&:hover': {
-            backgroundColor: '#e0e0e0',
-          },
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          borderRadius: '0', // Remove bordas arredondadas
-          border: 'none',    // Remove bordas
-          '&:hover': {
-            backgroundColor: 'inherit', // Impede o efeito de hover
-          },
+          borderRadius: '0', // Bordas retas
+          border: 'none',    // Sem bordas
+          boxShadow: '0px 2px 4px rgba(0,0,0,0.2)', // Sombra padrão
         },
       },
     },
@@ -81,6 +70,7 @@ const theme = createTheme({
         root: {
           textTransform: 'none',
           fontWeight: 500,
+          boxShadow: 'none',
           '&:hover': {
             backgroundColor: '#535f6b',
           },
