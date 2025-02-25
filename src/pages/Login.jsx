@@ -16,7 +16,7 @@ function Login() {
     if (error) {
       setError(error.message);
     } else {
-      navigate('/'); // Redireciona para a página principal
+      navigate('/conversa-ia'); // Redireciona para a página principal
     }
   };
 

@@ -34,10 +34,10 @@ function Navbar() {
           variant="h6"
           sx={{ flexGrow: 1 }}
           component={Link}
-          to="/home"
+          to="/conversa-ia"
           style={{ textDecoration: 'none', color: 'inherit' }}
         >
-          AIngenharia
+          AIgenharia
         </Typography>
         {user ? (
           <>

@@ -15,7 +15,7 @@ function ConversaIA() {
     <Container maxWidth="md" sx={{ mt: 10 }}> {/* mt:10 ~ 80px */}
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" align="center" gutterBottom>
-          Conversa com IA
+          Converse com AIgenharia
         </Typography>
         <Box
           component="form"
