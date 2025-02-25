@@ -3,20 +3,25 @@ import { Container, Paper, Box, TextField, Button, Typography, Alert } from '@mu
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (password !== passwordConfirm) {
+      setError("As senhas não coincidem");
+      return;
+    }
+    const { error } = await supabase.auth.signUp({ email, password });
     if (error) {
       setError(error.message);
     } else {
-      navigate('/'); // Redireciona para a página principal
+      navigate('/login'); // Após registro, redireciona para login
     }
   };
 
@@ -28,15 +33,15 @@ function Login() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 'calc(100vh - 70px)', // compensando a Navbar fixa
+        minHeight: 'calc(100vh - 70px)',
       }}
     >
       <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
         <Typography variant="h4" align="center" gutterBottom>
-          Login
+          Registro
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
-        <Box component="form" noValidate sx={{ mt: 2 }} onSubmit={handleLogin}>
+        <Box component="form" noValidate sx={{ mt: 2 }} onSubmit={handleRegister}>
           <TextField
             label="Email"
             variant="outlined"
@@ -54,16 +59,25 @@ function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <TextField
+            label="Confirme a Senha"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+          />
           <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 3 }}>
-            Entrar
+            Registrar
           </Button>
         </Box>
-        <Button variant="text" onClick={() => navigate('/register')} fullWidth sx={{ mt: 2 }}>
-          Não tem uma conta? Registre-se
+        <Button variant="text" onClick={() => navigate('/login')} fullWidth sx={{ mt: 2 }}>
+          Já tem uma conta? Faça login
         </Button>
       </Paper>
     </Container>
   );
 }
 
-export default Login;
+export default Register;
