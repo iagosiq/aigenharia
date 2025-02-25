@@ -8,7 +8,7 @@ function Navbar() {
     <AppBar position="fixed">
       <Toolbar>
         <Button color="inherit" component={Link} to="/">
-          Conversa
+          Home
         </Button>
         <Button color="inherit" component={Link} to="/projetos">
           Projetos
