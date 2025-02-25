@@ -10,7 +10,7 @@ function ProtectedRoute({ children }) {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        navigate('/home');
+        navigate('/');
       }
       setLoading(false);
     });

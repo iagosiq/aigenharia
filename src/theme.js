@@ -1,17 +1,16 @@
-// src/theme.js
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#131034', // Sua cor primária desejada
+      main: '#131034',
       contrastText: '#fff',
     },
     secondary: {
       main: '#ff4081',
     },
     background: {
-      default: '#f5f5f5', // Cor de fundo global
+      default: '#f5f5f5',
     },
   },
   typography: {
@@ -21,7 +20,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: '#f5f5f5', // Garante o fundo no body
+          backgroundColor: 'main',
           margin: 0,
           padding: 0,
         },
@@ -30,12 +29,49 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: 'none',       // Remove a sombra padrão
-          border: '1px solid #ccc', // Adiciona uma borda sutil
-          borderRadius: '8px',      // Bordas arredondadas (opcional)
-          backgroundColor: '#f5f5f5', // Cor de fundo do Card
+          boxShadow: 'none',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          backgroundColor: '#f5f5f5',
           '&:hover': {
-            backgroundColor: '#e0e0e0', // Cor de fundo ao passar o mouse
+            backgroundColor: '#e0e0e0',
+          },
+        },
+      },
+    },
+    MuiBox: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          backgroundColor: '#f5f5f5',
+          '&:hover': {
+            backgroundColor: '#e0e0e0',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          backgroundColor: '#f5f5f5',
+          '&:hover': {
+            backgroundColor: '#e0e0e0',
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          borderRadius: '0', // Remove bordas arredondadas
+          border: 'none',    // Remove bordas
+          '&:hover': {
+            backgroundColor: 'inherit', // Impede o efeito de hover
           },
         },
       },
@@ -43,10 +79,10 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none', // Mantém a formatação do texto
+          textTransform: 'none',
           fontWeight: 500,
           '&:hover': {
-            backgroundColor: '#535f6b', // Exemplo: cor de hover para o botão (pode usar uma cor derivada do primary-hover)
+            backgroundColor: '#535f6b',
           },
         },
       },

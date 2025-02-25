@@ -71,7 +71,8 @@ function ProjectDetail() {
       setPdfLoading(false);
       return;
     }
-    const { publicURL, error: urlError } = supabase.storage
+    // Corrigindo o acesso ao public URL
+    const { data, error: urlError } = supabase.storage
       .from('pdfs')
       .getPublicUrl(filePath);
     if (urlError) {
@@ -80,7 +81,7 @@ function ProjectDetail() {
       setPdfLoading(false);
       return;
     }
-    const newPdf = { url: publicURL, name: file.name };
+    const newPdf = { url: data.publicUrl, name: file.name }; // usa data.publicUrl
     const updatedPdfs = [...pdfs, newPdf];
     setPdfs(updatedPdfs);
     const { error: updateError } = await supabase
@@ -95,7 +96,7 @@ function ProjectDetail() {
     }
     setPdfLoading(false);
   };
-
+  
   // Manipulação das estruturas
   const handleAddStructure = () => {
     setStructures([...structures, { name: '', unit: '', customUnit: '' }]);
