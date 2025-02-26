@@ -20,7 +20,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: 'magenta',
+          backgroundColor: '#f5f5f5',
           margin: 0,
           padding: 0,
         },
@@ -50,9 +50,9 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: 'none',
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          backgroundColor: '#f5f5f5',
+          // border: '1px solid #ccc',
+          // borderRadius: '8px',
+          backgroundColor: '#14103480',
         },
       },
     },
