@@ -17,18 +17,27 @@ import {
   Snackbar,
   Alert,
   Link as MuiLink,
-  MenuItem
+  MenuItem,
+  Tabs,
+  Tab
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 
 function ProjectDetail() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+
+  // Estados gerais
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [pdfs, setPdfs] = useState([]);
+
+  // Para PDFs e estruturas, agora organizados por categorias (abas)
+  const [categories, setCategories] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [structures, setStructures] = useState([]);
+
+  // Outros estados
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [showSavedCard, setShowSavedCard] = useState(false);
@@ -47,21 +56,30 @@ function ProjectDetail() {
         console.error('Erro ao buscar o projeto:', error);
       } else {
         setProject(data);
-        setPdfs(data.pdfs || []);
-        // Inicializa cada estrutura com campo customUnit vazio, se não existir
-        const initStructures = (data.structures || []).map(s => ({ ...s, customUnit: s.customUnit || '' }));
-        setStructures(initStructures);
+        // Se existir o campo categories, use-o; caso contrário, crie uma aba padrão "Geral"
+        if (data.categories && data.categories.length > 0) {
+          setCategories(data.categories);
+        } else {
+          setCategories([{ name: "Geral", pdfs: data.pdfs || [], structures: data.structures || [] }]);
+        }
       }
       setLoading(false);
     }
     fetchProject();
   }, [projectId]);
 
+  // Atualiza a categoria ativa dentro do array de categorias
+  const updateActiveCategory = (updatedCategory) => {
+    const newCategories = categories.map((cat, idx) => (idx === activeTab ? updatedCategory : cat));
+    setCategories(newCategories);
+  };
+
   const handleUploadPdf = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
     setPdfLoading(true);
-    const filePath = `pdfs/${projectId}/${Date.now()}_${file.name}`;
+    // FilePath: relativo ao bucket "pdfs", sem prefixo duplicado
+    const filePath = `${projectId}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage
       .from('pdfs')
       .upload(filePath, file);
@@ -71,7 +89,7 @@ function ProjectDetail() {
       setPdfLoading(false);
       return;
     }
-    // Corrigindo o acesso ao public URL
+    // Obter URL pública do arquivo
     const { data, error: urlError } = supabase.storage
       .from('pdfs')
       .getPublicUrl(filePath);
@@ -81,12 +99,17 @@ function ProjectDetail() {
       setPdfLoading(false);
       return;
     }
-    const newPdf = { url: data.publicUrl, name: file.name }; // usa data.publicUrl
-    const updatedPdfs = [...pdfs, newPdf];
-    setPdfs(updatedPdfs);
+    const newPdf = { url: data.publicUrl, name: file.name, filePath };
+    // Atualiza a categoria ativa com o novo PDF
+    const currentCategory = { ...categories[activeTab] };
+    const updatedPdfs = [...(currentCategory.pdfs || []), newPdf];
+    currentCategory.pdfs = updatedPdfs;
+    updateActiveCategory(currentCategory);
+
+    // Atualiza o projeto no banco com o novo array de categorias
     const { error: updateError } = await supabase
       .from('projects')
-      .update({ pdfs: updatedPdfs })
+      .update({ categories })
       .eq('id', projectId);
     if (updateError) {
       console.error('Erro ao atualizar PDFs no projeto:', updateError);
@@ -97,27 +120,57 @@ function ProjectDetail() {
     setPdfLoading(false);
   };
 
-  // Manipulação das estruturas
+  const handleDeletePdf = async (index) => {
+    const currentCategory = { ...categories[activeTab] };
+    const pdfToDelete = currentCategory.pdfs[index];
+    const { error: removeError } = await supabase.storage
+      .from('pdfs')
+      .remove([pdfToDelete.filePath]);
+    if (removeError) {
+      console.error('Erro ao excluir PDF do storage:', removeError);
+      setSnackbar({ open: true, message: 'Erro ao excluir PDF do storage', severity: 'error' });
+      return;
+    }
+    const updatedPdfs = currentCategory.pdfs.filter((_, i) => i !== index);
+    currentCategory.pdfs = updatedPdfs;
+    updateActiveCategory(currentCategory);
+    const { error: updateError } = await supabase
+      .from('projects')
+      .update({ categories })
+      .eq('id', projectId);
+    if (updateError) {
+      console.error('Erro ao atualizar PDFs após exclusão:', updateError);
+      setSnackbar({ open: true, message: 'Erro ao atualizar PDFs após exclusão', severity: 'error' });
+    } else {
+      setSnackbar({ open: true, message: 'PDF excluído com sucesso!', severity: 'success' });
+    }
+  };
+
+  // Manipulação das estruturas na aba ativa
   const handleAddStructure = () => {
-    setStructures([...structures, { name: '', unit: '', customUnit: '' }]);
+    const currentCategory = { ...categories[activeTab] };
+    currentCategory.structures = [...(currentCategory.structures || []), { name: '', unit: '', customUnit: '' }];
+    updateActiveCategory(currentCategory);
   };
 
   const handleStructureChange = (index, field, value) => {
-    const newStructures = structures.map((s, i) =>
+    const currentCategory = { ...categories[activeTab] };
+    currentCategory.structures = currentCategory.structures.map((s, i) =>
       i === index ? { ...s, [field]: value } : s
     );
-    setStructures(newStructures);
+    updateActiveCategory(currentCategory);
   };
 
   const handleDeleteStructure = (index) => {
-    const newStructures = structures.filter((_, i) => i !== index);
-    setStructures(newStructures);
+    const currentCategory = { ...categories[activeTab] };
+    currentCategory.structures = currentCategory.structures.filter((_, i) => i !== index);
+    updateActiveCategory(currentCategory);
   };
 
   const handleSaveStructures = async () => {
     const { error } = await supabase
       .from('projects')
-      .update({ structures })
+      .update({ categories })
       .eq('id', projectId);
     if (error) {
       console.error('Erro ao atualizar estruturas:', error);
@@ -126,6 +179,50 @@ function ProjectDetail() {
       setSnackbar({ open: true, message: 'Estruturas salvas com sucesso!', severity: 'success' });
       setShowSavedCard(true);
     }
+  };
+
+  // Abas: adicionar nova aba, editar nome da aba e excluir aba
+  const handleAddTab = () => {
+    const newCategory = { name: 'Nova Aba', pdfs: [], structures: [] };
+    setCategories([...categories, newCategory]);
+    setActiveTab(categories.length);
+  };
+
+  const handleTabNameChange = (e, idx) => {
+    const updatedCategory = { ...categories[idx], name: e.target.value };
+    const newCategories = categories.map((cat, i) => (i === idx ? updatedCategory : cat));
+    setCategories(newCategories);
+  };
+
+  const handleDeleteTab = async (idx) => {
+    if (categories.length === 1) {
+      setSnackbar({ open: true, message: 'Não é possível excluir a única aba.', severity: 'warning' });
+      return;
+    }
+    const confirmDelete = window.confirm('Tem certeza que deseja excluir esta aba? Todos os dados nela serão perdidos.');
+    if (!confirmDelete) return;
+    const newCategories = categories.filter((_, i) => i !== idx);
+    setCategories(newCategories);
+    // Ajusta a aba ativa, se necessário
+    if (activeTab >= newCategories.length) {
+      setActiveTab(newCategories.length - 1);
+    }
+    // Atualiza o projeto no banco
+    const { error } = await supabase
+      .from('projects')
+      .update({ categories: newCategories })
+      .eq('id', projectId);
+    if (error) {
+      console.error('Erro ao excluir a aba:', error);
+      setSnackbar({ open: true, message: 'Erro ao excluir a aba', severity: 'error' });
+    } else {
+      setSnackbar({ open: true, message: 'Aba excluída com sucesso!', severity: 'success' });
+    }
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setSelectedPdf(null);
   };
 
   const handleDeleteProject = async () => {
@@ -166,19 +263,55 @@ function ProjectDetail() {
   return (
     <Container sx={{ mt: 10 }}>
       {/* Cabeçalho e exclusão do projeto */}
-      <Paper sx={{ p: 4, mb: 4 }}>
+      <Paper sx={{ p: 4, mb: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">{project.name}</Typography>
           <Button variant="outlined" color="error" onClick={handleDeleteProject} startIcon={<DeleteIcon />}>
             Excluir Projeto
           </Button>
         </Box>
-        <Typography variant="body1" sx={{ mt: 2 }}>
+        <Typography variant="body1" sx={{ mt: 1 }}>
           {project.description}
         </Typography>
       </Paper>
 
-      {/* Seção para upload de PDFs */}
+      {/* Abas de categoria */}
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            sx={{ '& .MuiTabs-indicator': { display: 'none' } }}
+          >
+            {categories.map((cat, idx) => (
+              <Tab
+                key={idx}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <TextField
+                      value={cat.name}
+                      onChange={(e) => handleTabNameChange(e, idx)}
+                      variant="standard"
+                      InputProps={{ disableUnderline: true }}
+                    />
+                    {categories.length > 1 && (
+                      <IconButton
+                        size="small"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteTab(idx); }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                }
+              />
+            ))}
+          </Tabs>
+          <Button variant="text" onClick={handleAddTab}>Adicionar Aba</Button>
+        </Box>
+      </Paper>
+
+      {/* Conteúdo da aba ativa: Upload de PDFs */}
       <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h5" gutterBottom>
           Upload de PDF
@@ -190,12 +323,19 @@ function ProjectDetail() {
           </Button>
           {pdfLoading && <CircularProgress size={24} />}
         </Box>
-        {pdfs.length > 0 && (
+        {categories[activeTab].pdfs && categories[activeTab].pdfs.length > 0 && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle1">PDFs enviados:</Typography>
             <List>
-              {pdfs.map((pdf, index) => (
-                <ListItem key={index}>
+              {categories[activeTab].pdfs.map((pdf, index) => (
+                <ListItem
+                  key={index}
+                  secondaryAction={
+                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeletePdf(index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                >
                   <ListItemText
                     primary={pdf.name}
                     secondary={
@@ -226,14 +366,14 @@ function ProjectDetail() {
         )}
       </Paper>
 
-      {/* Seção para inserir e salvar estruturas */}
+      {/* Conteúdo da aba ativa: Gerenciamento de Estruturas */}
       <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h5" gutterBottom>
           Estruturas e Medidas
         </Typography>
         {!showSavedCard ? (
           <>
-            {structures.map((structure, index) => (
+            {categories[activeTab].structures && categories[activeTab].structures.map((structure, index) => (
               <Box key={index} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2, alignItems: 'center' }}>
                 <TextField
                   label="Nome da Estrutura"
@@ -283,7 +423,7 @@ function ProjectDetail() {
               Estruturas Salvas
             </Typography>
             <List>
-              {structures.map((structure, index) => (
+              {categories[activeTab].structures && categories[activeTab].structures.map((structure, index) => (
                 <ListItem key={index}>
                   <ListItemText
                     primary={structure.name}
