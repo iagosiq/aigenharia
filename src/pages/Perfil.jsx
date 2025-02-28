@@ -18,7 +18,7 @@ function Perfil() {
         <Typography variant="h4" align="center" gutterBottom>
           Perfil do Usuário
         </Typography>
-        <Box component="form" noValidate sx={{ mt: 2 }}>
+        <Box component="form" noValidate sx={{ mt: 2, backgroundColor: 'transparent' }}>
           <TextField label="Nome" variant="outlined" fullWidth margin="normal" />
           <TextField label="Email" variant="outlined" fullWidth margin="normal" />
           <TextField label="Senha" type="password" variant="outlined" fullWidth margin="normal" />

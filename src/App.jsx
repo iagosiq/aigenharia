@@ -10,6 +10,9 @@ import ProjectDetail from './pages/ProjectDetail';
 import Home from './pages/Home';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import theme from './theme';
+import ReactDOM from 'react-dom/client';
 
 function App() {
   return (
@@ -59,7 +62,14 @@ function App() {
   );
 }
 
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>
+);
+
 export default App;
-
-
-
