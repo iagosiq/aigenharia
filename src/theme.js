@@ -52,7 +52,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: 'none',
-          backgroundColor: 'rgba(246, 246, 239, 0.73)',
+          backgroundColor: 'rgba(246, 246, 239, 0.89)',
         },
       },
     },

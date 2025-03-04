@@ -1,7 +1,9 @@
-// src/pages/Projects.jsx
-import { useEffect, useState } from 'react';
-import { getProjects, supabase } from '../supabaseClient';
+// Projetos.jsx
+
+
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getProjects, supabase } from '../supabaseClient';
 import {
   Container,
   Paper,
@@ -9,7 +11,7 @@ import {
   Typography,
   Button,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   Dialog,
   DialogTitle,
@@ -23,12 +25,11 @@ import {
 function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false); // controle do modal de adição
+  const [open, setOpen] = useState(false); // Modal para adicionar projeto
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
   const [adding, setAdding] = useState(false);
 
-  // Busca os projetos do Supabase
   useEffect(() => {
     async function fetchData() {
       try {
@@ -43,24 +44,18 @@ function Projects() {
     fetchData();
   }, []);
 
-  // Abre o modal para adicionar projeto
   const handleOpen = () => {
     setNewProjectName('');
     setNewProjectDescription('');
     setOpen(true);
   };
 
-  // Fecha o modal
   const handleClose = () => {
     setOpen(false);
   };
 
-  // Função para adicionar um novo projeto via Supabase
   const handleAddProject = async () => {
-    if (!newProjectName.trim()) {
-      // Nome é obrigatório
-      return;
-    }
+    if (!newProjectName.trim()) return;
     setAdding(true);
     const { error } = await supabase
       .from('projects')
@@ -68,7 +63,6 @@ function Projects() {
     if (error) {
       console.error('Erro ao adicionar projeto:', error);
     } else {
-      // Atualiza a lista de projetos após a inserção
       const updatedProjects = await getProjects();
       setProjects(updatedProjects);
       handleClose();
@@ -76,27 +70,29 @@ function Projects() {
     setAdding(false);
   };
 
+  if (loading) {
+    return (
+      <Container sx={{ mt: 10, mb: 12, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth="md" sx={{ mt: 10 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
+    <Container sx={{ mt: 10, mb: 12 }}>
+      <Paper sx={{ p: 4 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h4">Projetos</Typography>
+          <Typography variant="h4" sx={{ mb: 2 }}>Meus Projetos</Typography>
           <Button variant="contained" color="primary" onClick={handleOpen}>
             Adicionar Projeto
           </Button>
         </Box>
-
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : projects.length > 0 ? (
+        {projects.length > 0 ? (
           <List>
             {projects.map((project) => (
-              <ListItem
-                key={project.id}
-                button
-                component={Link}
+              <ListItemButton 
+                key={project.id} 
+                component={Link} 
                 to={`/projeto/${project.id}`}
               >
                 <ListItemText 
@@ -104,12 +100,12 @@ function Projects() {
                   secondary={project.description}
                   sx={{
                     '& .MuiListItemText-primary': {
-                      borderBottom: '1px solid #ccc', // Adiciona borda inferior ao texto primário (nome do projeto)
-                      color: '#202020', // Cor do texto primário
+                      borderBottom: '1px solid #ccc',
+                      color: '#202020',
                     },
                   }} 
-                  />
-              </ListItem>
+                />
+              </ListItemButton>
             ))}
           </List>
         ) : (
@@ -117,7 +113,6 @@ function Projects() {
         )}
       </Paper>
 
-      {/* Modal para adicionar projeto */}
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Adicionar Projeto</DialogTitle>
         <DialogContent>

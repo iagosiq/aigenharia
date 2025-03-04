@@ -1,4 +1,5 @@
-// src/pages/ProjectDetail.jsx
+// ProjectDetail.jsx
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
@@ -19,7 +20,7 @@ import {
   Link as MuiLink,
   MenuItem,
   Tabs,
-  Tab
+  Tab,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
@@ -35,7 +36,7 @@ function ProjectDetail() {
   // Para o upload de PDFs
   const [pdfLoading, setPdfLoading] = useState(false);
 
-  // Para categorias (abas) que contêm pdfs e estruturas
+  // Para categorias (abas) com PDFs e estruturas
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -44,7 +45,7 @@ function ProjectDetail() {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [showSavedCard, setShowSavedCard] = useState(false);
 
-  // Estados para a conversa adicional (apenas declarados uma vez)
+  // Estados para a conversa adicional
   const [convStructure, setConvStructure] = useState("");
   const [convPage, setConvPage] = useState("");
   const [convMultiple, setConvMultiple] = useState("");
@@ -64,7 +65,6 @@ function ProjectDetail() {
         console.error('Erro ao buscar o projeto:', error);
       } else {
         setProject(data);
-        // Se o projeto tiver arrays "pdfs" e "structures" (ou "categories"), use-os; caso contrário, crie uma aba padrão "Geral"
         if (data.categories && data.categories.length > 0) {
           setCategories(data.categories);
         } else {
@@ -76,7 +76,6 @@ function ProjectDetail() {
     fetchProject();
   }, [projectId]);
 
-  // Atualiza a categoria ativa dentro do array de categorias
   const updateActiveCategory = (updatedCategory) => {
     const newCategories = categories.map((cat, idx) =>
       idx === activeTab ? updatedCategory : cat
@@ -88,7 +87,6 @@ function ProjectDetail() {
     const file = event.target.files[0];
     if (!file) return;
     setPdfLoading(true);
-    // O filePath é relativo ao bucket "pdfs" (não deve incluir o nome do bucket)
     const filePath = `${projectId}/${activeTab}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage
       .from('pdfs')
@@ -109,7 +107,6 @@ function ProjectDetail() {
       return;
     }
     const newPdf = { url: data.publicUrl, name: file.name, filePath };
-    // Atualiza a categoria ativa com o novo PDF
     const currentCategory = { ...categories[activeTab] };
     const updatedPdfs = [...(currentCategory.pdfs || []), newPdf];
     currentCategory.pdfs = updatedPdfs;
@@ -153,7 +150,6 @@ function ProjectDetail() {
     }
   };
 
-  // Manipulação das estruturas na aba ativa
   const handleAddStructure = () => {
     const currentCategory = { ...categories[activeTab] };
     currentCategory.structures = [
@@ -191,7 +187,6 @@ function ProjectDetail() {
     }
   };
 
-  // Abas: adicionar nova aba, editar nome da aba e excluir aba
   const handleAddTab = () => {
     const newCategory = { name: 'Nova Aba', pdfs: [], structures: [] };
     setCategories([...categories, newCategory]);
@@ -252,14 +247,12 @@ function ProjectDetail() {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Função para enviar a conversa adicional
   const handleSendConversation = () => {
     console.log("Estrutura específica:", convStructure);
     console.log("Página da demanda:", convPage);
     console.log("Mais de um desenho na mesma página:", convMultiple);
     console.log("Detalhe:", convDetail);
     setSnackbar({ open: true, message: "Mensagem enviada!", severity: "success" });
-    // Limpa os campos
     setConvStructure("");
     setConvPage("");
     setConvMultiple("");
@@ -305,7 +298,7 @@ function ProjectDetail() {
             <Tabs
               value={activeTab}
               onChange={handleTabChange}
-              sx={{ '& .MuiTabs-indicator': { display: 'none' }, }}
+              sx={{ '& .MuiTabs-indicator': { display: 'none' } }}
             >
               {categories.map((cat, idx) => (
                 <Tab
@@ -450,7 +443,6 @@ function ProjectDetail() {
                 {categories[activeTab].structures && categories[activeTab].structures.map((structure, index) => (
                   <ListItem key={index}>
                     <ListItemText
-                      sx={{  }}
                       primary={structure.name}
                       secondary={structure.unit === 'Outros' ? structure.customUnit : structure.unit}
                     />

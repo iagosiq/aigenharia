@@ -1,6 +1,8 @@
 // src/main.jsx
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { ThemeProvider } from '@mui/material/styles';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from './theme';
-import App from './App.jsx';
+
+
