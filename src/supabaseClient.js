@@ -26,3 +26,14 @@ export async function getProjects() {
   return data;
 }
 
+
+export const updateProjectCategories = async (projectId, categories) => {
+  const { data, error } = await supabase
+    .from('projects')
+    .update({ categories })
+    .eq('id', projectId);
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
